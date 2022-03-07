@@ -1,0 +1,106 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<button class="scroll-top" id="js-button">
+	<i class="fa fa-chevron-up" aria-hidden="true">TOP</i>
+</button>
+    <div class="timeline">
+      <div class="twits">
+        <form id="hashtag-form" action="/searchFeed" method="post">
+          <div class="twit-author">Count {{count}}</div>
+          <input type="text" name="searchTitle" placeholder="제목 검색" size=6 maxlength=8>
+          <input type="text" name="searchSubtitle" placeholder="부제목 검색" size=8 maxlength=8>
+          <select name="category" id="category-select">
+            <option value="">--category--</option>
+            <option value="전체">전체</option>
+            {% for cg in category %}
+            <option value="{{cg.key}}">{{cg.key}} ({{cg.doc_count}})</option>
+            {% endfor %}
+          </select>
+          <button class="btn">검색</button>
+        </form>
+         {% for twit in twist %} 
+          <div class="twit">
+            <input type="hidden" value="{{twit._id}}" class="twit-id">
+            <div class="twit-author">{{twit._source.title}}</div>
+            <div class="twit-content">{{twit._source.subtitle}}</div>
+          </div>
+         {% endfor %}
+          <div id="moreView" class="twit" style="text-align: center; cursor: pointer;">
+            <input type="hidden" value="{{scrollId}}" id="scrollId" class="twit-id">
+            <div class="twit-author">더보기</div>
+            <div class="twit-content"></div>
+          </div>
+      </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script>
+  const createBtn = document.getElementById('createBtn');
+  const deleteBtn = document.getElementById('deleteBtn');
+  createBtn.addEventListener('click',()=>{
+      const form = document.getElementById('Form');
+      form.submit();
+  });
+  deleteBtn.addEventListener('click',()=>{
+    const form = document.createElement("form");
+    form.setAttribute("method", "post");  //Post 방식
+    form.setAttribute("action", "/deleteData"); //요청 보낼 주소
+    form.setAttribute("charset", "UTF-8");
+    document.body.appendChild(form);
+    form.submit();
+  });
+  //요청
+  const viewBtn = document.getElementById('moreView');
+  const scrollId = document.getElementById('scrollId').value;
+  const request = new XMLHttpRequest();
+  viewBtn.addEventListener('click',()=>{
+  request.open('POST', '/moreView', true); 
+  request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  request.send('scrollId='+scrollId); 
+
+  //응답
+  request.onload = function() { 
+      if(request.status == 200) { 
+        const response = JSON.parse(request.responseText);
+        const ID = response.next_page;
+        const test = response.data;
+        test.forEach(element => {
+            let addTag = "<div class='twit'>";
+            addTag += "<input type='hidden' value="+ element.id + " class='twit-id'>";
+            addTag += "<div class='twit-author'>"+element.data.title+"</div>";
+            addTag += "<div class='twit-content'>"+element.data.subtitle+"</div>";
+            addTag += "</div>";
+            let doc = new DOMParser().parseFromString(addTag, "text/html");
+            let test = doc.body.firstElementChild;
+            viewBtn.before(test);
+        });
+      }else{
+        alert('데이터가 없습니다.');
+      }
+  }
+  })
+  scrollTop('js-button', 200);
+  function scrollTop(elem,duration) {
+    let target = document.getElementById(elem);
+
+    target.addEventListener('click', function() {
+      let currentY = window.pageYOffset; 
+      let step = duration/currentY > 1 ? 10 : 100;
+      let timeStep = duration/currentY * step;
+      let intervalID = setInterval(scrollUp, timeStep);
+
+      function scrollUp(){
+        currentY = window.pageYOffset;
+        if(currentY === 0) {
+          clearInterval(intervalID);
+        } else {
+          scrollBy( 0, -step );
+        }
+      }
+    });
+  }
+
+</script>
+{% endblock %}

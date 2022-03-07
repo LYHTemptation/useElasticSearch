@@ -1,0 +1,12 @@
+node_modules
+
+.env
+
+passport
+
+migrations
+
+seeders
+
+config
+

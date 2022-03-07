@@ -1,0 +1,101 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<button class="scroll-top" id="js-button">
+	<i class="fa fa-chevron-up" aria-hidden="true">TOP</i>
+</button>
+    <div class="timeline">
+      <div class="twits">
+        <form id="hashtag-form" action="/searchFeed/book" method="post">
+          <!-- <div class="twit-author">Count {{count}}</div> -->
+          <input type="text" name="searchTitle" placeholder="도서명 검색" size=6 maxlength=8>
+          <input type="hidden" id="bookName" name="bookName" value="{{bookName}}">
+          <!-- <input type="text" name="searchSubtitle" placeholder="부제목 검색" size=8 maxlength=8> -->
+          <select name="category" id="category-select">
+            <option value="">--category--</option>
+            <option value="전체">전체</option>
+            {% for cg in category %}
+            <option value="{{cg.key}}">{{cg.key}} ({{cg.doc_count}})</option>
+            {% endfor %}
+          </select>
+          <button class="btn">검색</button>
+        </form>
+        <table style="width:100%;"> 
+            <tr>
+                <th>도서명</th>
+                <th>작가</th>
+                <th>출판사</th>
+                <th>출판년도</th>
+                <th>상태</th>
+            </tr>
+            {% for twit in twist %}
+            <tr>
+                <td style="width: 50%;">{{twit._source.bookName}}</td>
+                <td style="width: 15%;">{{twit._source.author}}</td>
+                <td style="width: 10%;">{{twit._source.publishingHouse}}</td>
+                <td style="width: 10%;">{{twit._source.publishedYear}}</td>
+                <td style="width: 15%;">{{twit._source.bookStatus}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <div class="center">
+            <div class="pagination">
+            <a href="#">&laquo;</a>
+            <a href="#" onclick="page(this);">1</a>
+            <a href="#" onclick="page(this);">2</a>
+            <a href="#" onclick="page(this);">3</a>
+            <a href="#" onclick="page(this);">4</a>
+            <a href="#" onclick="page(this);">5</a>
+            <a href="#" onclick="page(this);">6</a>
+            <a href="#">&raquo;</a>
+            </div>
+          </div>
+      </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script>
+  const createBtn = document.getElementById('createBtn');
+  const deleteBtn = document.getElementById('deleteBtn');
+  createBtn.addEventListener('click',()=>{
+      const form = document.getElementById('Form');
+      form.submit();
+  });
+  deleteBtn.addEventListener('click',()=>{
+    const form = document.createElement("form");
+    form.setAttribute("method", "post");  //Post 방식
+    form.setAttribute("action", "/deleteData"); //요청 보낼 주소
+    form.setAttribute("charset", "UTF-8");
+    document.body.appendChild(form);
+    form.submit();
+  });
+
+  scrollTop('js-button', 200);
+  function scrollTop(elem,duration) {
+    let target = document.getElementById(elem);
+
+    target.addEventListener('click', function() {
+      let currentY = window.pageYOffset; 
+      let step = duration/currentY > 1 ? 10 : 100;
+      let timeStep = duration/currentY * step;
+      let intervalID = setInterval(scrollUp, timeStep);
+
+      function scrollUp(){
+        currentY = window.pageYOffset;
+        if(currentY === 0) {
+          clearInterval(intervalID);
+        } else {
+          scrollBy( 0, -step );
+        }
+      }
+    });
+  }
+function page(data){
+    const bookName = document.getElementById('bookName').value;
+    console.log(bookName);
+    const page =data.innerText;
+    location.href='?page='+page+'&bookName='+bookName;
+}
+</script>
+{% endblock %}

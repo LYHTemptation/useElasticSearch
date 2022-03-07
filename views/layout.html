@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="/main.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="profile-wrap">
+        <div class="profile">
+        <form id="Form" action="/getData" method="post">
+            <!-- <div class="input-group">
+              <label for="startPage">start</label>
+              <input id="startPage" type="text" name="startPage" required autofocus>
+            </div> -->
+            <div style="margin-bottom: 10px;">
+              <label for="lastPage">데이터갯수</label>
+              <input id="lastPage" type="text" name="count" size=10 required >
+            </div>
+            <button id="createBtn" type="submit" class="btn">GET</button>
+            <button id="deleteBtn" type="submit" class="btn">DELETE</button>
+          </form>
+        </div>
+        <a href="./book">book</a>
+      </div>
+      {% block content %}
+      {% endblock %}
+    </div>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    
+    {% block script %}
+    {% endblock %}
+  </body>
+</html>
